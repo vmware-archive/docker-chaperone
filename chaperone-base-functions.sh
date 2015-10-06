@@ -100,15 +100,27 @@ create_dockerfile()
 	local dockerdir="$1"
 	local user="$2"
 	local passwd="$3"
+	local initfile=$(mktemp -p "${dockerdir}" -t XXXXXXXX)
+
+	cat >> ${initfile} <<-EOF
+		#!/bin/bash
+		echo "running 10-apache2 with args: " "$*"
+
+		if [ -x /etc/init.d/apache2 ]; then
+			rm -rf /var/run/apache2/*
+			service apache2 start
+		fi
+	EOF
+	chmod +x ${initfile}
 
 	cat >> ${dockerdir}/Dockerfile <<-EOF
 		FROM phusion/baseimage
 		MAINTAINER Tom Hite <thite@vmware.com>
 
 		# basic necessities
-		RUN apt-get update
-		RUN apt-get upgrade -y
 		RUN DEBIAN_FRONTEND=noninteractive apt-get install -y openssh-server sudo
+		RUN DEBIAN_FRONTEND=noninteractive apt-get update
+		RUN DEBIAN_FRONTEND=noninteractive apt-get upgrade -y
 
 		# python setup tools
 		RUN DEBIAN_FRONTEND=noninteractive apt-get install -y curl python-dev make
@@ -127,6 +139,10 @@ create_dockerfile()
 
 		# start long running services at container start
 		ADD ./start.sh /start.sh
+
+		# Setup the vncserver at start
+		ADD $(basename ${initfile}) /etc/supervisord/init.d/10-vncserver
+
 		CMD /start.sh "${user}" "${passwd}"
 	EOF
 	echo ${dockerdir}
