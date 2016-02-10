@@ -1,0 +1,11 @@
+os:
+  - linux
+
+services:
+  - docker
+
+script:
+  - ./build.sh
+  - docker images | grep openedge/chaperone-base
+  - docker images | grep openedge/chaperone-dev
+  - docker images | grep openedge/chaperone-lxde

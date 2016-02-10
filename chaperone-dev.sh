@@ -28,7 +28,7 @@ login_user=vmware
 if [ -n "${1}" ]; then
 	login_user="${1}"
 fi
-		
+
 dockerdir=$(create_dockerfile "${login_user}")
 pushd "${dockerdir}"
 docker build -t openedge/chaperone-dev .

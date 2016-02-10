@@ -2,8 +2,17 @@
 
 create_dockerfile()
 {
-	local dockerdir=$(mktemp -d)
-	local vncserver=$(mktemp -p "${dockerdir}" -t XXXXXXXX)
+	local dockerdir=''
+	local vncserver=''
+	if uname -a | grep -q Darwin; then
+		dockerdir=$(mktemp -d)
+		pushd "${dockerdir}" >/dev/null
+		vncserver="${dockerdir}/$(mktemp XXXXXXXX)"
+		popd >/dev/null
+	else
+		dockerdir=$(mktemp -d)
+		vncserver=$(mktemp -p "${dockerdir}" -t XXXXXXXX)
+	fi
 
 	cat >> ${vncserver} <<-EOF
 		#!/bin/bash

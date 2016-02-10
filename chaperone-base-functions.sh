@@ -7,7 +7,12 @@
 # returns: directory in which the Docker files should exist
 create_startscript()
 {
-	local dockerdir=$(mktemp --tmpdir -d dockerdir.XXXX)
+	local dockerdir=''
+	if uname -a | grep -q Darwin; then
+		dockerdir=$(mktemp -d -t dockerdir )
+	else
+		dockerdir=$(mktemp --tmpdir -d dockerdir.XXXX)
+	fi
 
 	cat >"${dockerdir}/start.sh" <<-EOS
 		#!/bin/bash
@@ -17,7 +22,12 @@ create_startscript()
 		###
 		function supervisor_config_script()
 		{
-			 local file=\$(mktemp --tmpdir supervisor.XXXX)
+			 local file=''
+			 if uname -a | grep -q Darwin; then
+				 file=\$(mktemp -t supervisor.XXXX)
+			 else
+				 file=\$(mktemp --tmpdir supervisor.XXXX)
+			 fi
 			 cat >\${file} <<-EOC
 				#!/bin/bash
 				# start with a header
@@ -100,7 +110,14 @@ create_dockerfile()
 	local dockerdir="$1"
 	local user="$2"
 	local passwd="$3"
-	local initfile=$(mktemp -p "${dockerdir}" -t XXXXXXXX)
+	local initfile=''
+	if uname -a | grep -q Darwin; then
+		pushd ${dockerdir}
+		initfile="${dockerdir}/$(mktemp XXXXXXXX )"
+		popd
+	else
+		initfile=$(mktemp -p "${dockerdir}" -t XXXXXXXX)
+	fi
 
 	cat >> ${initfile} <<-EOF
 		#!/bin/bash

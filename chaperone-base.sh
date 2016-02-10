@@ -67,7 +67,7 @@ case "$1" in
 		if [ -n "${1}" ]; then
 			login_user="${1}"
 		fi
-		
+
 		if [ -n "${2}" ]; then
 			login_pass="${2}"
 		fi
@@ -75,7 +75,11 @@ case "$1" in
 		#echo "wiping prior etcd image ..."
 		run_command "docker rmi ${CONTAINER_USER}/${CONTAINER_NAME}" || echo ""
 
-		script="$(mktemp --tmpdir ${CONTAINER_NAME}.XXXXXXXX)"
+		if uname -a | grep -q Darwin; then
+			script="$(mktemp -t ${CONTAINER_NAME}.XXXXXXXX)"
+		else
+			script="$(mktemp --tmpdir ${CONTAINER_NAME}.XXXXXXXX)"
+		fi
 		generate_script_header ${script}
 		cat >>${script} <<-EOF
 			# generate the ${CONTAINER_NAME} container and set it up
