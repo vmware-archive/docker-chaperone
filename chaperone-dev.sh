@@ -8,7 +8,14 @@ create_dockerfile()
 		MAINTAINER Tom Hite <thite@vmware.com>
 
 		# get the base development and X11 stuff
-		RUN DEBIAN_FRONTEND=noninteractive apt-get install -y curl git tig make sshpass vim
+
+		RUN DEBIAN_FRONTEND=noninteractive apt-get update
+    RUN (\
+      DEBIAN_FRONTEND=noninteractive apt-get install -y curl git \
+      sshpass vim nano python-setuptools python-yaml python-jinja2 \
+      python-httplib2 python-paramiko \
+      procps debianutils build-essential \
+    )
 
 		# get the repo tool and other base development and X11 stuff
 		RUN (\

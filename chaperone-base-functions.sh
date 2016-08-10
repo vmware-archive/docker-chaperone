@@ -97,6 +97,9 @@ create_startscript()
 			run-parts /etc/supervisord/init.d \$(printf " --arg=%s" "\${@}")
 		fi
 
+    # Generate the SSH keys
+    /usr/bin/ssh-keygen -A
+
 		# start the supervisor daemon to stick around as this is a server
 		supervisord -n
 	EOS
@@ -135,8 +138,8 @@ create_dockerfile()
 		MAINTAINER Tom Hite <thite@vmware.com>
 
 		# basic necessities
-		RUN DEBIAN_FRONTEND=noninteractive apt-get install -y openssh-server sudo
-		RUN DEBIAN_FRONTEND=noninteractive apt-get update
+    RUN DEBIAN_FRONTEND=noninteractive apt-get update
+    RUN DEBIAN_FRONTEND=noninteractive apt-get install -y openssh-server sudo
 		RUN DEBIAN_FRONTEND=noninteractive apt-get upgrade -y
 
 		# python setup tools
